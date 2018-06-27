@@ -1,0 +1,6 @@
+dependencies {
+    compileOnly group: 'org.jooq', name: 'jooq'
+    compileOnly group: 'com.fasterxml.jackson.core', name: 'jackson-core'
+    compileOnly group: 'com.fasterxml.jackson.core', name: 'jackson-annotations'
+    compileOnly group: 'com.fasterxml.jackson.core', name: 'jackson-databind'
+}
