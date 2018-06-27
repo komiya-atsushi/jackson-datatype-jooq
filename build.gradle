@@ -1,7 +1,20 @@
+buildscript {
+    repositories {
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
+    }
+
+    dependencies {
+        classpath group: 'io.spring.gradle', name: 'dependency-management-plugin', version: '1.0.5.RELEASE'
+    }
+}
+
 group 'me.k11i'
 
 subprojects {
     apply plugin: 'java'
+    apply plugin: 'io.spring.dependency-management'
 
     sourceCompatibility = 1.8
 
