@@ -1,6 +1,70 @@
+buildscript {
+    ext {
+        junit5Version = '5.2.0'
+        h2Version = '1.4.197'
+        h2Url = "jdbc:h2:file:$projectDir/tmp/unit_test"
+    }
+
+    dependencies {
+        classpath group: 'com.h2database', name: 'h2', version: h2Version
+    }
+}
+
+plugins {
+    id 'org.flywaydb.flyway' version '5.1.1'
+    id 'nu.studer.jooq' version '2.0.11'
+}
+
 dependencies {
     compileOnly group: 'org.jooq', name: 'jooq'
     compileOnly group: 'com.fasterxml.jackson.core', name: 'jackson-core'
     compileOnly group: 'com.fasterxml.jackson.core', name: 'jackson-annotations'
     compileOnly group: 'com.fasterxml.jackson.core', name: 'jackson-databind'
+
+    testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: junit5Version
+    testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-params', version: junit5Version
+    testRuntimeOnly group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: junit5Version
+    testImplementation group: 'org.assertj', name: 'assertj-core', version: '3.8.0'
+
+    testImplementation group: 'org.jooq', name: 'jooq'
+    testImplementation group: 'com.fasterxml.jackson.core', name: 'jackson-core'
+    testImplementation group: 'com.fasterxml.jackson.core', name: 'jackson-annotations'
+    testImplementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind'
+    testImplementation group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310'
+    testImplementation group: 'com.h2database', name: 'h2', version: h2Version
+    jooqRuntime group: 'com.h2database', name: 'h2', version: h2Version
+}
+
+flyway {
+    url = h2Url
+    user = 'sa'
+    locations = ["filesystem:$projectDir/src/test/resources/db/migration"]
+}
+
+jooq {
+    unitTest(sourceSets.test) {
+        jdbc {
+            driver = 'org.h2.Driver'
+            url = h2Url
+            user = 'sa'
+        }
+        generator {
+            name = 'org.jooq.util.DefaultGenerator'
+            database {
+                name = 'org.jooq.util.h2.H2Database'
+                includes = '.*'
+                inputSchema = 'PUBLIC'
+            }
+        }
+    }
+}
+
+generateUnitTestJooqSchemaSource.dependsOn(flywayClean, flywayMigrate)
+
+test {
+    useJUnitPlatform()
+
+    testLogging {
+        events "passed", "skipped", "failed"
+    }
 }
