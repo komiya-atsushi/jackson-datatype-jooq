@@ -1,6 +1,7 @@
 package me.k11i.jackson.module.jooq;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -149,6 +150,19 @@ class JooqRecordSerializerTest extends TestWithJooqBase {
                 TEST_TABLE.TIMESTAMP_TZ_COL,
                 TEST_TABLE.ARRAY_COL);
 
+        static final FieldList WITHOUT_ARRAY_AND_NULLABLE = new FieldList(
+                TEST_TABLE.INT_COL,
+                TEST_TABLE.TINYINT_COL,
+                TEST_TABLE.BIGINT_COL,
+                TEST_TABLE.DECIMAL_COL,
+                TEST_TABLE.DOUBLE_COL,
+                TEST_TABLE.STRING_COL,
+                TEST_TABLE.BOOL_COL,
+                TEST_TABLE.TIME_COL,
+                TEST_TABLE.DATE_COL,
+                TEST_TABLE.TIMESTAMP_TZ_COL);
+
+
         final List<Field<?>> fields;
 
         FieldList(Field<?>... fields) {
@@ -273,7 +287,8 @@ class JooqRecordSerializerTest extends TestWithJooqBase {
         }
     }
 
-    private static final ObjectMapper DEFAULT_OBJECT_MAPPER = new ObjectMapper();
+    private static final ObjectMapper DEFAULT_OBJECT_MAPPER = new ObjectMapper()
+            .enable(JsonParser.Feature.STRICT_DUPLICATE_DETECTION);
 
     static List<Arguments> testSerialize() {
         return Arrays.asList(
@@ -299,22 +314,21 @@ class JooqRecordSerializerTest extends TestWithJooqBase {
                         "PropertyNamingStrategy: Kebab case",
                         new ObjectMapper().setPropertyNamingStrategy(PropertyNamingStrategy.KEBAB_CASE),
                         JsonAttributeDictionary.KEBAB_CASE,
-                        Arrays.asList(FieldList.ALL, FieldList.ALL, FieldList.ALL))
+                        Arrays.asList(FieldList.ALL, FieldList.ALL, FieldList.ALL)),
 
-                // -- Serialization inclusion (not implemented yet)
+                // -- Serialization inclusion
 
-//                Arguments.of(
-//                        "Serialization inclusion: Non-null",
-//                        new ObjectMapper().setSerializationInclusion(JsonInclude.Include.NON_NULL),
-//                        JsonAttributeDictionary.LOWER_CAMEL_CASE,
-//                        Arrays.asList(FieldList.ALL, FieldList.WITHOUT_NULLABLE, FieldList.WITHOUT_NULLABLE)),
-//
-//                Arguments.of(
-//                        "Serialization inclusion: Non-empty",
-//                        new ObjectMapper().setSerializationInclusion(JsonInclude.Include.NON_EMPTY),
-//                        JsonAttributeDictionary.LOWER_CAMEL_CASE,
-//                        Arrays.asList(FieldList.WITHOUT_ARRAY, FieldList.ALL, FieldList.WITHOUT_ARRAY))
+                Arguments.of(
+                        "Serialization inclusion: Non-null",
+                        new ObjectMapper().setSerializationInclusion(JsonInclude.Include.NON_NULL),
+                        JsonAttributeDictionary.LOWER_CAMEL_CASE,
+                        Arrays.asList(FieldList.ALL, FieldList.WITHOUT_NULLABLE, FieldList.WITHOUT_NULLABLE)),
 
+                Arguments.of(
+                        "Serialization inclusion: Non-empty",
+                        new ObjectMapper().setSerializationInclusion(JsonInclude.Include.NON_EMPTY),
+                        JsonAttributeDictionary.LOWER_CAMEL_CASE,
+                        Arrays.asList(FieldList.WITHOUT_ARRAY, FieldList.WITHOUT_NULLABLE, FieldList.WITHOUT_ARRAY_AND_NULLABLE))
         );
     }
 
