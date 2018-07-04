@@ -17,6 +17,7 @@ CREATE TABLE test_table (
 );
 
 INSERT INTO test_table (int_col, tinyint_col, bigint_col, decimal_col, double_col, string_col, bool_col, time_col, date_col, timestamp_tz_col, array_col, nullable_col) VALUES
+  (0, 0, 0, 0.0, 0.0, '', false, '00:00:00', '1970-01-01', '1970-01-01 00:00:00Z', (1, 3, 5), false),
   (1, 2, 3, 4.5, 0.5, 'abc', true, '12:34:56', '2018-01-01', '2018-01-01 12:34:56+09:00', (), false),
   (2, 3, 4, 5.6, 0.25, 'ABC', false, '11:22:33', '2018-02-02', '2018-02-02 11:22:33Z', (1, 2), null),
   (3, 4, 5, 6.7, 0.125, '123', true, '22:33:44', '2018-03-03', '2018-03-03 22:33:44-09:00', (), null)

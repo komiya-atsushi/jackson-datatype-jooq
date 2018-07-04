@@ -28,7 +28,9 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.jooq.generated.tables.TestTable.TEST_TABLE;
@@ -124,44 +126,15 @@ class JooqRecordSerializerTest extends TestWithJooqBase {
                 TEST_TABLE.ARRAY_COL,
                 TEST_TABLE.NULLABLE_COL);
 
-        static final FieldList WITHOUT_ARRAY = new FieldList(
-                TEST_TABLE.INT_COL,
-                TEST_TABLE.TINYINT_COL,
-                TEST_TABLE.BIGINT_COL,
-                TEST_TABLE.DECIMAL_COL,
-                TEST_TABLE.DOUBLE_COL,
-                TEST_TABLE.STRING_COL,
-                TEST_TABLE.BOOL_COL,
-                TEST_TABLE.TIME_COL,
-                TEST_TABLE.DATE_COL,
-                TEST_TABLE.TIMESTAMP_TZ_COL,
+        static final FieldList WITHOUT_ARRAY = ALL.exclude(TEST_TABLE.ARRAY_COL);
+
+        static final FieldList WITHOUT_NULLABLE = ALL.exclude(TEST_TABLE.NULLABLE_COL);
+
+        static final FieldList WITHOUT_ARRAY_AND_NULLABLE = ALL.exclude(
+                TEST_TABLE.ARRAY_COL,
                 TEST_TABLE.NULLABLE_COL);
 
-        static final FieldList WITHOUT_NULLABLE = new FieldList(
-                TEST_TABLE.INT_COL,
-                TEST_TABLE.TINYINT_COL,
-                TEST_TABLE.BIGINT_COL,
-                TEST_TABLE.DECIMAL_COL,
-                TEST_TABLE.DOUBLE_COL,
-                TEST_TABLE.STRING_COL,
-                TEST_TABLE.BOOL_COL,
-                TEST_TABLE.TIME_COL,
-                TEST_TABLE.DATE_COL,
-                TEST_TABLE.TIMESTAMP_TZ_COL,
-                TEST_TABLE.ARRAY_COL);
-
-        static final FieldList WITHOUT_ARRAY_AND_NULLABLE = new FieldList(
-                TEST_TABLE.INT_COL,
-                TEST_TABLE.TINYINT_COL,
-                TEST_TABLE.BIGINT_COL,
-                TEST_TABLE.DECIMAL_COL,
-                TEST_TABLE.DOUBLE_COL,
-                TEST_TABLE.STRING_COL,
-                TEST_TABLE.BOOL_COL,
-                TEST_TABLE.TIME_COL,
-                TEST_TABLE.DATE_COL,
-                TEST_TABLE.TIMESTAMP_TZ_COL);
-
+        static final FieldList WITHOUT_STRING = ALL.exclude(TEST_TABLE.STRING_COL);
 
         final List<Field<?>> fields;
 
@@ -169,12 +142,39 @@ class JooqRecordSerializerTest extends TestWithJooqBase {
             this.fields = Arrays.asList(fields);
         }
 
+        FieldList(List<Field<?>> fields) {
+            this.fields = fields;
+        }
+
         List<Field<?>> fields() {
             return fields;
+        }
+
+        FieldList exclude(Field<?>... fieldsToExclude) {
+            Set<String> names = Arrays.stream(fieldsToExclude)
+                    .map(Field::getName)
+                    .collect(Collectors.toSet());
+            return fields.stream()
+                    .filter(f -> !names.contains(f.getName()))
+                    .collect(Collectors.collectingAndThen(Collectors.toList(), FieldList::new));
         }
     }
 
     static class ExpectedValues {
+        static final ExpectedValues RECORD_0 = new ExpectedValues()
+                .value(TEST_TABLE.INT_COL, 0)
+                .value(TEST_TABLE.TINYINT_COL, 0)
+                .value(TEST_TABLE.BIGINT_COL, 0)
+                .value(TEST_TABLE.DECIMAL_COL, 0.0)
+                .value(TEST_TABLE.DOUBLE_COL, 0.0)
+                .value(TEST_TABLE.STRING_COL, "")
+                .value(TEST_TABLE.BOOL_COL, false)
+                .value(TEST_TABLE.TIME_COL, "00:00:00")
+                .value(TEST_TABLE.DATE_COL, "1970-01-01")
+                .value(TEST_TABLE.TIMESTAMP_TZ_COL, "1970-01-01T00:00:00Z")
+                .value(TEST_TABLE.ARRAY_COL, Arrays.asList(1, 3, 5))
+                .value(TEST_TABLE.NULLABLE_COL, false);
+
         static final ExpectedValues RECORD_1 = new ExpectedValues()
                 .value(TEST_TABLE.INT_COL, 1)
                 .value(TEST_TABLE.TINYINT_COL, 2)
@@ -229,7 +229,7 @@ class JooqRecordSerializerTest extends TestWithJooqBase {
         }
 
         static ExpectedValues get(int arrayIndex) {
-            return Arrays.asList(RECORD_1, RECORD_2, RECORD_3).get(arrayIndex);
+            return Arrays.asList(RECORD_0, RECORD_1, RECORD_2, RECORD_3).get(arrayIndex);
         }
     }
 
@@ -296,7 +296,7 @@ class JooqRecordSerializerTest extends TestWithJooqBase {
                         "Default setting",
                         new ObjectMapper(),
                         JsonAttributeDictionary.LOWER_CAMEL_CASE,
-                        Arrays.asList(FieldList.ALL, FieldList.ALL, FieldList.ALL)),
+                        Arrays.asList(FieldList.ALL, FieldList.ALL, FieldList.ALL, FieldList.ALL)),
 
                 // -- Naming strategy
 
@@ -304,17 +304,17 @@ class JooqRecordSerializerTest extends TestWithJooqBase {
                         "PropertyNamingStrategy: Upper camel case",
                         new ObjectMapper().setPropertyNamingStrategy(PropertyNamingStrategy.UPPER_CAMEL_CASE),
                         JsonAttributeDictionary.UPPER_CAMEL_CASE,
-                        Arrays.asList(FieldList.ALL, FieldList.ALL, FieldList.ALL)),
+                        Arrays.asList(FieldList.ALL, FieldList.ALL, FieldList.ALL, FieldList.ALL)),
                 Arguments.of(
                         "PropertyNamingStrategy: Snake case",
                         new ObjectMapper().setPropertyNamingStrategy(PropertyNamingStrategy.SNAKE_CASE),
                         JsonAttributeDictionary.SNAKE_CASE,
-                        Arrays.asList(FieldList.ALL, FieldList.ALL, FieldList.ALL)),
+                        Arrays.asList(FieldList.ALL, FieldList.ALL, FieldList.ALL, FieldList.ALL)),
                 Arguments.of(
                         "PropertyNamingStrategy: Kebab case",
                         new ObjectMapper().setPropertyNamingStrategy(PropertyNamingStrategy.KEBAB_CASE),
                         JsonAttributeDictionary.KEBAB_CASE,
-                        Arrays.asList(FieldList.ALL, FieldList.ALL, FieldList.ALL)),
+                        Arrays.asList(FieldList.ALL, FieldList.ALL, FieldList.ALL, FieldList.ALL)),
 
                 // -- Serialization inclusion
 
@@ -322,13 +322,21 @@ class JooqRecordSerializerTest extends TestWithJooqBase {
                         "Serialization inclusion: Non-null",
                         new ObjectMapper().setSerializationInclusion(JsonInclude.Include.NON_NULL),
                         JsonAttributeDictionary.LOWER_CAMEL_CASE,
-                        Arrays.asList(FieldList.ALL, FieldList.WITHOUT_NULLABLE, FieldList.WITHOUT_NULLABLE)),
+                        Arrays.asList(
+                                FieldList.ALL,
+                                FieldList.ALL,
+                                FieldList.WITHOUT_NULLABLE,
+                                FieldList.WITHOUT_NULLABLE)),
 
                 Arguments.of(
                         "Serialization inclusion: Non-empty",
                         new ObjectMapper().setSerializationInclusion(JsonInclude.Include.NON_EMPTY),
                         JsonAttributeDictionary.LOWER_CAMEL_CASE,
-                        Arrays.asList(FieldList.WITHOUT_ARRAY, FieldList.WITHOUT_NULLABLE, FieldList.WITHOUT_ARRAY_AND_NULLABLE))
+                        Arrays.asList(
+                                FieldList.WITHOUT_STRING,
+                                FieldList.WITHOUT_ARRAY,
+                                FieldList.WITHOUT_NULLABLE,
+                                FieldList.WITHOUT_ARRAY_AND_NULLABLE))
         );
     }
 
@@ -344,9 +352,9 @@ class JooqRecordSerializerTest extends TestWithJooqBase {
 
             List l = DEFAULT_OBJECT_MAPPER.readValue(result, List.class);
 
-            assertThat(l).hasSize(3);
+            assertThat(l).hasSize(4);
 
-            for (int i = 0; i < 3; i++) {
+            for (int i = 0; i < 4; i++) {
                 AssertionContext context = new AssertionContext(i);
 
                 context.assertThat(l).element(i).isInstanceOfSatisfying(Map.class, (Consumer<Map<String, ?>>) map -> {
