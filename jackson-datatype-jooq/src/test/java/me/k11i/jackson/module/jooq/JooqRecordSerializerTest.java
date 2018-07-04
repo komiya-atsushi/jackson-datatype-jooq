@@ -295,6 +295,7 @@ class JooqRecordSerializerTest extends TestWithJooqBase {
                 Arguments.of(
                         "Default setting",
                         new ObjectMapper(),
+                        new JooqModule(),
                         JsonAttributeDictionary.LOWER_CAMEL_CASE,
                         Arrays.asList(FieldList.ALL, FieldList.ALL, FieldList.ALL, FieldList.ALL)),
 
@@ -303,16 +304,19 @@ class JooqRecordSerializerTest extends TestWithJooqBase {
                 Arguments.of(
                         "PropertyNamingStrategy: Upper camel case",
                         new ObjectMapper().setPropertyNamingStrategy(PropertyNamingStrategy.UPPER_CAMEL_CASE),
+                        new JooqModule(),
                         JsonAttributeDictionary.UPPER_CAMEL_CASE,
                         Arrays.asList(FieldList.ALL, FieldList.ALL, FieldList.ALL, FieldList.ALL)),
                 Arguments.of(
                         "PropertyNamingStrategy: Snake case",
                         new ObjectMapper().setPropertyNamingStrategy(PropertyNamingStrategy.SNAKE_CASE),
+                        new JooqModule(),
                         JsonAttributeDictionary.SNAKE_CASE,
                         Arrays.asList(FieldList.ALL, FieldList.ALL, FieldList.ALL, FieldList.ALL)),
                 Arguments.of(
                         "PropertyNamingStrategy: Kebab case",
                         new ObjectMapper().setPropertyNamingStrategy(PropertyNamingStrategy.KEBAB_CASE),
+                        new JooqModule(),
                         JsonAttributeDictionary.KEBAB_CASE,
                         Arrays.asList(FieldList.ALL, FieldList.ALL, FieldList.ALL, FieldList.ALL)),
 
@@ -321,6 +325,7 @@ class JooqRecordSerializerTest extends TestWithJooqBase {
                 Arguments.of(
                         "Serialization inclusion: Non-null",
                         new ObjectMapper().setSerializationInclusion(JsonInclude.Include.NON_NULL),
+                        new JooqModule(),
                         JsonAttributeDictionary.LOWER_CAMEL_CASE,
                         Arrays.asList(
                                 FieldList.ALL,
@@ -331,6 +336,7 @@ class JooqRecordSerializerTest extends TestWithJooqBase {
                 Arguments.of(
                         "Serialization inclusion: Non-empty",
                         new ObjectMapper().setSerializationInclusion(JsonInclude.Include.NON_EMPTY),
+                        new JooqModule(),
                         JsonAttributeDictionary.LOWER_CAMEL_CASE,
                         Arrays.asList(
                                 FieldList.WITHOUT_STRING,
@@ -341,6 +347,7 @@ class JooqRecordSerializerTest extends TestWithJooqBase {
                 Arguments.of(
                         "Serialization inclusion: Non-default",
                         new ObjectMapper().setSerializationInclusion(JsonInclude.Include.NON_DEFAULT),
+                        new JooqModule(),
                         JsonAttributeDictionary.LOWER_CAMEL_CASE,
                         Arrays.asList(
                                 FieldList.ALL.exclude(
@@ -353,14 +360,23 @@ class JooqRecordSerializerTest extends TestWithJooqBase {
                                         TEST_TABLE.NULLABLE_COL),
                                 FieldList.WITHOUT_ARRAY.exclude(TEST_TABLE.NULLABLE_COL),
                                 FieldList.WITHOUT_NULLABLE.exclude(TEST_TABLE.BOOL_COL),
-                                FieldList.WITHOUT_ARRAY_AND_NULLABLE))
+                                FieldList.WITHOUT_ARRAY_AND_NULLABLE)),
+
+                // -- JooqSerializationFeature
+
+                Arguments.of(
+                        "JooqSerializationFeature.USE_DEFAULT_BEAN_SERIALIZER_FOR_TABLE_RECORD",
+                        new ObjectMapper(),
+                        new JooqModule().enableFeatures(JooqSerializationFeature.USE_DEFAULT_BEAN_SERIALIZER_FOR_TABLE_RECORD),
+                        JsonAttributeDictionary.LOWER_CAMEL_CASE,
+                        Arrays.asList(FieldList.ALL, FieldList.ALL, FieldList.ALL, FieldList.ALL))
         );
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
     @MethodSource
-    void testSerialize(String settingName, ObjectMapper mapper, JsonAttributeDictionary dictionary, List<FieldList> fieldLists) throws Exception {
-        mapper.registerModule(new JooqModule())
+    void testSerialize(String settingName, ObjectMapper mapper, JooqModule jooqModule, JsonAttributeDictionary dictionary, List<FieldList> fieldLists) throws Exception {
+        mapper.registerModule(jooqModule)
                 .registerModule(new JavaTimeModule())
                 .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 
