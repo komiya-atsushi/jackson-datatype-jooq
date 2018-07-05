@@ -7,10 +7,12 @@ import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.SerializationConfig;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
+import com.fasterxml.jackson.databind.util.ClassUtil;
 import org.jooq.Field;
 import org.jooq.Record;
 
 import java.io.IOException;
+import java.util.Objects;
 
 /**
  * Serializer for {@link Record} object.
@@ -27,6 +29,7 @@ class JooqRecordSerializer extends StdSerializer<Record> {
         PropertyNamingStrategy namingStrategy = null;
         boolean omitsNull = false;
         boolean omitsEmpty = false;
+        boolean omitsDefaultValue = false;
 
         SerializationConfig config = provider.getConfig();
         if (config != null) {
@@ -39,6 +42,9 @@ class JooqRecordSerializer extends StdSerializer<Record> {
                 if (valueInclusion != null) {
                     switch (valueInclusion) {
                         case NON_DEFAULT:
+                            omitsDefaultValue = true;
+                            // fall through
+
                         case NON_EMPTY:
                             omitsEmpty = true;
                             // fall through
@@ -71,6 +77,12 @@ class JooqRecordSerializer extends StdSerializer<Record> {
                         continue;
                     }
                 }
+                if (omitsDefaultValue) {
+                    Object defaultValue = getDefaultValue(field.getType());
+                    if (defaultValue != null && Objects.equals(value, defaultValue)) {
+                        continue;
+                    }
+                }
 
             } else if (omitsNull) {
                 continue;
@@ -82,5 +94,18 @@ class JooqRecordSerializer extends StdSerializer<Record> {
         }
 
         gen.writeEndObject();
+    }
+
+    private Object getDefaultValue(Class<?> type) {
+        Class<?> primitiveType = ClassUtil.primitiveType(type);
+        if (primitiveType != null) {
+            return ClassUtil.defaultValue(primitiveType);
+        }
+
+        if (type == String.class) {
+            return "";
+        }
+
+        return null;
     }
 }

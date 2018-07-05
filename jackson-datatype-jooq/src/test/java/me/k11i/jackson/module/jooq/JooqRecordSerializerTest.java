@@ -336,6 +336,23 @@ class JooqRecordSerializerTest extends TestWithJooqBase {
                                 FieldList.WITHOUT_STRING,
                                 FieldList.WITHOUT_ARRAY,
                                 FieldList.WITHOUT_NULLABLE,
+                                FieldList.WITHOUT_ARRAY_AND_NULLABLE)),
+
+                Arguments.of(
+                        "Serialization inclusion: Non-default",
+                        new ObjectMapper().setSerializationInclusion(JsonInclude.Include.NON_DEFAULT),
+                        JsonAttributeDictionary.LOWER_CAMEL_CASE,
+                        Arrays.asList(
+                                FieldList.ALL.exclude(
+                                        TEST_TABLE.INT_COL,
+                                        TEST_TABLE.TINYINT_COL,
+                                        TEST_TABLE.BIGINT_COL,
+                                        TEST_TABLE.DOUBLE_COL,
+                                        TEST_TABLE.BOOL_COL,
+                                        TEST_TABLE.STRING_COL,
+                                        TEST_TABLE.NULLABLE_COL),
+                                FieldList.WITHOUT_ARRAY.exclude(TEST_TABLE.NULLABLE_COL),
+                                FieldList.WITHOUT_NULLABLE.exclude(TEST_TABLE.BOOL_COL),
                                 FieldList.WITHOUT_ARRAY_AND_NULLABLE))
         );
     }
