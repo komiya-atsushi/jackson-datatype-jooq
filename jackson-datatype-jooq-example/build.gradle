@@ -1,0 +1,61 @@
+buildscript {
+    ext {
+        h2Version = '1.4.197'
+        h2Url = "jdbc:h2:file:$projectDir/tmp/example"
+    }
+
+    dependencies {
+        classpath group: 'com.h2database', name: 'h2', version: h2Version
+    }
+}
+
+plugins {
+    id 'org.flywaydb.flyway' version '5.1.1'
+    id 'nu.studer.jooq' version '2.0.11'
+    id 'application'
+}
+
+dependencies {
+    implementation project(':jackson-datatype-jooq')
+
+    implementation group: 'org.jooq', name: 'jooq'
+    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-core'
+    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind'
+    implementation group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310'
+    implementation group: 'com.h2database', name: 'h2', version: h2Version
+
+    jooqRuntime group: 'com.h2database', name: 'h2', version: h2Version
+}
+
+flyway {
+    url = h2Url
+    user = 'sa'
+}
+
+jooq {
+    example(sourceSets.main) {
+        jdbc {
+            driver = 'org.h2.Driver'
+            url = h2Url
+            user = 'sa'
+        }
+        generator {
+            name = 'org.jooq.util.DefaultGenerator'
+            database {
+                name = 'org.jooq.util.h2.H2Database'
+                includes = '.*'
+                inputSchema = 'PUBLIC'
+            }
+        }
+    }
+}
+
+generateExampleJooqSchemaSource.dependsOn(flywayClean, flywayMigrate)
+
+mainClassName = 'me.k11i.jackson.module.jooq.example.JooqModuleExample'
+
+run {
+    args = [ h2Url ]
+}
+
+run.dependsOn(generateExampleJooqSchemaSource)

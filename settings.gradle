@@ -1,2 +1,3 @@
 rootProject.name = 'jackson-datatype-jooq-parent'
 include 'jackson-datatype-jooq'
+include 'jackson-datatype-jooq-example'
