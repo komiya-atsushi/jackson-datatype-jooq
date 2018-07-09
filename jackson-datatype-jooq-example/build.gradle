@@ -51,11 +51,10 @@ jooq {
 }
 
 generateExampleJooqSchemaSource.dependsOn(flywayClean, flywayMigrate)
+compileJava.dependsOn(generateExampleJooqSchemaSource)
 
 mainClassName = 'me.k11i.jackson.module.jooq.example.JooqModuleExample'
 
 run {
     args = [ h2Url ]
 }
-
-run.dependsOn(generateExampleJooqSchemaSource)

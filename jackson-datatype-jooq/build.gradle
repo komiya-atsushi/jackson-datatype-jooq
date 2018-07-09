@@ -60,6 +60,7 @@ jooq {
 }
 
 generateUnitTestJooqSchemaSource.dependsOn(flywayClean, flywayMigrate)
+compileTestJava.dependsOn(generateUnitTestJooqSchemaSource)
 
 test {
     useJUnitPlatform()
