@@ -22,8 +22,7 @@ public class JooqModule extends Module {
 
     @Override
     public Version version() {
-        // TODO version
-        return Version.unknownVersion();
+        return ModuleVersion.VERSION;
     }
 
     @Override

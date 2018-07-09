@@ -13,6 +13,7 @@ buildscript {
 plugins {
     id 'org.flywaydb.flyway' version '5.1.1'
     id 'nu.studer.jooq' version '2.0.11'
+    id 'me.k11i.jackson.jackson-version-file-plugin'
 }
 
 dependencies {
@@ -68,4 +69,8 @@ test {
     testLogging {
         events "passed", "skipped", "failed"
     }
+}
+
+generateJacksonVersionFile {
+    packageName = "me.k11i.jackson.module.jooq"
 }
