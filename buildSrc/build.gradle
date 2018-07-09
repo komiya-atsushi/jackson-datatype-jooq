@@ -1,0 +1,10 @@
+apply plugin: 'java-gradle-plugin'
+
+gradlePlugin {
+    plugins {
+        jacksonVersionFilePlugin {
+            id = 'me.k11i.jackson.jackson-version-file-plugin'
+            implementationClass = 'me.k11i.jackson.JacksonVersionFilePlugin'
+        }
+    }
+}
