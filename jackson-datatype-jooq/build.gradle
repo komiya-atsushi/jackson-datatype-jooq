@@ -11,6 +11,7 @@ buildscript {
 }
 
 plugins {
+    id 'maven-publish'
     id 'org.flywaydb.flyway' version '5.1.1'
     id 'nu.studer.jooq' version '2.0.11'
     id 'me.k11i.jackson.jackson-version-file-plugin'
@@ -34,6 +35,41 @@ dependencies {
     testImplementation group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310'
     testImplementation group: 'com.h2database', name: 'h2', version: h2Version
     jooqRuntime group: 'com.h2database', name: 'h2', version: h2Version
+}
+
+task sourcesJar(type: Jar) {
+    from sourceSets.main.allJava
+    classifier 'sources'
+}
+
+task javadocJar(type: Jar) {
+    from javadoc
+    classifier 'javadoc'
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+            artifact sourcesJar
+            artifact javadocJar
+            pom {
+                name = 'Jackson datatype: jOOQ'
+                description = 'Add-on module for Jackson to serialize jOOQ records.'
+                url = 'https://github.com/komiya-atsushi/jackson-datatype-jooq'
+                licenses {
+                    license {
+                        name = 'The Apache License, Version 2.0'
+                        url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                    }
+                }
+                scm {
+                    connection = 'scm:git:https://github.com/komiya-atsushi/jackson-datatype-jooq.git'
+                    url = 'https://github.com/komiya-atsushi/jackson-datatype-jooq'
+                }
+            }
+        }
+    }
 }
 
 flyway {
