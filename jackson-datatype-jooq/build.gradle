@@ -3,6 +3,7 @@ buildscript {
         junit5Version = '5.2.0'
         h2Version = '1.4.197'
         h2Url = "jdbc:h2:file:$projectDir/tmp/unit_test"
+        githubRepoUrl = 'https://github.com/komiya-atsushi/jackson-datatype-jooq'
     }
 
     dependencies {
@@ -57,7 +58,7 @@ publishing {
             pom {
                 name = 'Jackson datatype: jOOQ'
                 description = 'Add-on module for Jackson to serialize jOOQ records.'
-                url = 'https://github.com/komiya-atsushi/jackson-datatype-jooq'
+                url = githubRepoUrl
                 licenses {
                     license {
                         name = 'The Apache License, Version 2.0'
@@ -65,8 +66,8 @@ publishing {
                     }
                 }
                 scm {
-                    connection = 'scm:git:https://github.com/komiya-atsushi/jackson-datatype-jooq.git'
-                    url = 'https://github.com/komiya-atsushi/jackson-datatype-jooq'
+                    connection = "scm:git:${githubRepoUrl}.git".toString()
+                    url = githubRepoUrl
                 }
             }
         }
