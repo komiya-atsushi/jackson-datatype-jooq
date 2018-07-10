@@ -12,12 +12,16 @@ buildscript {
 }
 
 plugins {
+    id 'java-library'
     id 'maven-publish'
+    id 'com.jfrog.bintray' version '1.8.4'
     id 'net.researchgate.release' version '2.7.0'
     id 'org.flywaydb.flyway' version '5.1.1'
     id 'nu.studer.jooq' version '2.0.11'
     id 'me.k11i.jackson.jackson-version-file-plugin'
 }
+
+description = 'Add-on module for Jackson to serialize jOOQ records.'
 
 dependencies {
     compileOnly group: 'org.jooq', name: 'jooq'
@@ -57,7 +61,7 @@ publishing {
             artifact javadocJar
             pom {
                 name = 'Jackson datatype: jOOQ'
-                description = 'Add-on module for Jackson to serialize jOOQ records.'
+                description = project.description
                 url = githubRepoUrl
                 licenses {
                     license {
@@ -73,6 +77,27 @@ publishing {
         }
     }
 }
+
+bintray {
+    user = project.hasProperty('bintrayUser') ? bintrayUser : System.getenv('BINTRAY_USER')
+    key = project.hasProperty('bintrayKey') ? bintrayKey : System.getenv('BINTRAY_KEY')
+    publications = ['mavenJava']
+    publish = true
+
+    pkg {
+        repo = 'maven'
+        name = project.name
+        desc = project.description
+        userOrg = 'komiya-atsushi'
+        websiteUrl = githubRepoUrl
+        issueTrackerUrl = "${githubRepoUrl}/issues"
+        vcsUrl = "${githubRepoUrl}.git"
+        licenses = ['Apache-2.0']
+        labels = ['jackson', 'jooq']
+    }
+}
+
+afterReleaseBuild.dependsOn bintrayUpload
 
 flyway {
     url = h2Url
