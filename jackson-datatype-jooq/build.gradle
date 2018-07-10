@@ -12,6 +12,7 @@ buildscript {
 
 plugins {
     id 'maven-publish'
+    id 'net.researchgate.release' version '2.7.0'
     id 'org.flywaydb.flyway' version '5.1.1'
     id 'nu.studer.jooq' version '2.0.11'
     id 'me.k11i.jackson.jackson-version-file-plugin'
